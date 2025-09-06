@@ -23,4 +23,7 @@ df['target']=encoder.fit_transform(df['target'])
 # print(df.duplicated().sum())
 df=df.drop_duplicates(keep='first')
 # print(df.duplicated().sum())
-print(df.shape)
+# print(df.shape)
+
+#EDA
+print(df['target'].value_counts())
