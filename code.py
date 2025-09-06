@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 
 df=pd.read_csv(r'D:\VSCodeProjects\sms-spam-classifier\E-Mail-Spam-Classifier\spam.csv', encoding='latin-1')
 # print(df.sample(5))
@@ -14,7 +16,6 @@ df.drop(columns=['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], inplace=True)
 df.rename(columns={'v1':'target', 'v2':'text'}, inplace=True)
 # print(df.sample(5))
 
-from sklearn.preprocessing import LabelEncoder
 encoder=LabelEncoder()
 df['target']=encoder.fit_transform(df['target'])
 # print(df.head())
@@ -26,4 +27,6 @@ df=df.drop_duplicates(keep='first')
 # print(df.shape)
 
 #EDA
-print(df['target'].value_counts())
+# print(df['target'].value_counts())
+plt.pie(df['target'].value_counts(), labels=['ham', 'spam'], autopct="%0.2f")
+plt.show()
