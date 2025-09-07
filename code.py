@@ -4,7 +4,11 @@ from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import seaborn as sns
 import nltk
-
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+import string
+from wordcloud import WordCloud
+from collections import Counter
 
 df=pd.read_csv(r'D:\VSCodeProjects\sms-spam-classifier\E-Mail-Spam-Classifier\spam.csv', encoding='latin-1')
 # print(df.sample(5))
@@ -53,3 +57,57 @@ df['num_sentences'] = df['text'].apply(lambda x: len(nltk.sent_tokenize(x)))
 
 # sns.heatmap(df.drop(columns='text').corr(), annot=True)
 # plt.show()
+
+ps = PorterStemmer()
+#Data Preprocessing
+def transform_text(text):
+    text=text.lower()
+    text=nltk.word_tokenize(text)
+    y=[]
+    for i in text:
+        if i.isalnum():
+            y.append(i) 
+        # if i.isalnum()==False:
+        #     text.remove(i)
+    text=y[:]
+    y.clear()
+
+    for i in text:
+        if i not in stopwords.words('english') and i not in string.punctuation:
+            y.append(i)
+
+    text=y[:]
+    y.clear()
+    for i in text:
+        y.append(ps.stem(i))
+    return " ".join(y)
+
+# print(transform_text("I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today."))
+# print(df['text'][10])
+df['transformed_text']=df['text'].apply(transform_text)
+# print(df.head())
+
+# wc = WordCloud(width=500, height=500, min_font_size=10, background_color='white')
+# spam_wc = wc.generate(df[df['target']==1]['transformed_text'].str.cat(sep=" "))
+# plt.imshow(spam_wc)
+# plt.axis("off")
+# plt.show()
+# ham_wc = wc.generate(df[df['target']==0]['transformed_text'].str.cat(sep=" "))
+# plt.imshow(ham_wc)
+# plt.axis("off")
+# plt.show()
+
+spam_corpus = []
+for msg in df['transformed_text'][df['target']==1].tolist():
+    for word in msg.split():
+        spam_corpus.append(word)
+# print(len(spam_corpus))
+
+# sns.barplot(x=pd.DataFrame(Counter(spam_corpus).most_common(30))[0],y=pd.DataFrame(Counter(spam_corpus).most_common(30))[1])
+# plt.xticks(rotation='vertical')
+# plt.show()
+
+ham_corpus = []
+for msg in df['transformed_text'][df['target']==0].tolist():
+    for word in msg.split():
+        ham_corpus.append(word)
